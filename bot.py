@@ -6,7 +6,6 @@ from datetime import datetime
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)
-# bot.send_message(-801071288, "I'm alive!")
 
 def save_members():
     with open("members.txt", "w") as f:
@@ -71,9 +70,11 @@ def send_help(message):
     /members - Show the list of all group members.
     /daily - Declare your daily LeetCode completion.
     /username - Check your current Telegram username.
+    /status - Check your daily progress and penalties.
     /help - Display this help text.
     """
     bot.send_message(message.chat.id, help_text)
+
 
 
 @bot.message_handler(commands=['add'])
