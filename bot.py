@@ -6,6 +6,7 @@ from datetime import datetime
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)
+bot.send_message(-801071288, "I'm alive!")
 
 @bot.message_handler(commands=['start', 'hello'])
 def send_welcome(message):
@@ -18,9 +19,9 @@ def echo_all(message):
 def check_time():
     while True:
         now = datetime.now()
-        if now.hour == 5 and now.minute == 0:
+        if now.hour == 17 and now.minute == 35:
             # Do something specific at 5am
-            print("It's 5am! Time for something special!")
+            bot.send_message(-801071288, "It's 5am! Time for something special!")
             time.sleep(60)  # Sleep for 60 seconds to avoid multiple notifications
         else:
             time.sleep(10)  # Sleep for 10 seconds before checking again
