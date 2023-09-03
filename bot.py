@@ -30,6 +30,17 @@ def send_welcome(message):
         save_members()
     bot.reply_to(message, "Howdy, how are you doing?")
 
+@bot.message_handler(commands=['help'])
+def send_help(message):
+    help_text = """
+    Here are the commands you can use:
+    /start, /hello - Start the bot and add your username to the group members.
+    /add [username] - Add a specified username to the group members list.
+    /members - Show the list of all group members.
+    /help - Display this help text.
+    """
+    bot.send_message(message.chat.id, help_text)
+
 @bot.message_handler(commands=['add'])
 def add_member(message):
     try:
