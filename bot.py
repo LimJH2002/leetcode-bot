@@ -27,8 +27,12 @@ def add_member(message):
         bot.reply_to(message, "Please provide a member name after the /add command.")
     
 @bot.message_handler(commands=['members'])
-def show_members(group_members):
-    bot.send_message(-801071288, group_members)
+def show_members(message):
+    if group_members:
+        members_list = '\n'.join(group_members)
+        bot.send_message(message.chat.id, "Group members:\n" + members_list)
+    else:
+        bot.send_message(message.chat.id, "No members have been added yet.")
 
 def check_time():
     while True:
