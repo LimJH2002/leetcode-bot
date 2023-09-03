@@ -90,7 +90,6 @@ def send_help(message):
 
 
 
-
 @bot.message_handler(commands=['add'])
 def add_member(message):
     try:
@@ -107,7 +106,7 @@ def add_member(message):
         
         # If the input doesn't start with '@' and isn't "ME", reject it
         elif not member_name.startswith('@'):
-            bot.reply_to(message, "Please provide a valid member name or mention starting with '@' or use 'ME' to add yourself.")
+            bot.reply_to(message, "Please provide a valid member's Telegram username or mention starting with '@' or use 'ME' to add yourself.")
             return
         else:
             # Remove the @ symbol
@@ -119,7 +118,7 @@ def add_member(message):
         # Send a message mentioning the added user
         bot.send_message(message.chat.id, f"Added [{member_name}](tg://user?id={member_name}) to the group members list.", parse_mode='Markdown')
     except IndexError:
-        bot.reply_to(message, "Please provide a member name after the /add command.")
+        bot.reply_to(message, "Please provide a member's Telegram username after the /add command.")
 
 
     
