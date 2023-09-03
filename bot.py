@@ -185,7 +185,7 @@ def check_username(message):
 def check_time():
     while True:
         now = datetime.now()
-        if now.hour >= 5 and now.minute >= 0:
+        if now.hour == 5 and now.minute == 0:
             for user in group_members:
                 if not daily_progress.get(user, False):  # If the user hasn't marked their progress
                     # Check if they have credits to use
