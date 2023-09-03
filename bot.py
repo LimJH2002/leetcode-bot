@@ -6,7 +6,7 @@ from datetime import datetime
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)
-bot.send_message(-801071288, "I'm alive!")
+# bot.send_message(-801071288, "I'm alive!")
 
 def save_members():
     with open("members.txt", "w") as f:
