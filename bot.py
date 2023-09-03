@@ -139,17 +139,25 @@ def add_member(message):
 def daily_declaration(message):
     user_name = message.from_user.username
     if user_name:
-        if daily_progress.get(user_name, False):  # If the user has already marked their progress for today
-            credits[user_name] = credits.get(user_name, 0) + 1  # Grant a credit
-            if credits[user_name] > 3:  # Cap the credits at 3
-                credits[user_name] = 3
-            bot.reply_to(message, "You've already declared your completion for today. A credit has been added. Remember, you can have a maximum of 3 credits.")
-        else:
-            daily_progress[user_name] = True  # Mark the user's progress for the day as complete
-            bot.reply_to(message, "Your LeetCode completion for today has been recorded. Well done!")
+        # If the user has already declared their daily completion
+        if daily_progress.get(user_name, False):
+            credits[user_name] = min(3, credits.get(user_name, 0) + 1)
+            if credits[user_name] == 3:
+                bot.reply_to(message, "You've already completed your daily LeetCode! You've also maxed out your credits at 3.")
+                return
+            else:
+                save_data()
+                bot.reply_to(message, f"You've already completed your daily LeetCode! You now have {credits[user_name]} credits.")
+                return
+        
+        # Mark the user's progress for the day as complete
+        daily_progress[user_name] = True
+        current_credits = credits.get(user_name, 0)
         save_data()
+        bot.reply_to(message, f"Your LeetCode completion for today has been recorded. Well done! You have {current_credits} credits.")
     else:
         bot.reply_to(message, "Error: Couldn't retrieve your username. Please ensure you have a username set on Telegram.")
+
 
 @bot.message_handler(commands=['members'])
 def show_members(message):
