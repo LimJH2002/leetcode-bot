@@ -61,6 +61,18 @@ def send_welcome(message):
         save_members()
     bot.reply_to(message, "Howdy, how are you doing?")
 
+@bot.message_handler(commands=['status'])
+def check_status(message):
+    user_name = message.from_user.username
+    if user_name:
+        progress = daily_progress.get(user_name, False)
+        penalty = penalties.get(user_name, 0)
+        
+        progress_status = "completed" if progress else "not completed"
+        bot.reply_to(message, f"Your daily LeetCode progress: {progress_status}\nYour total penalties: ${penalty}")
+    else:
+        bot.reply_to(message, "Error: Couldn't retrieve your username. Please ensure you have a username set on Telegram.")
+
 @bot.message_handler(commands=['help'])
 def send_help(message):
     help_text = """
