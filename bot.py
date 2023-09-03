@@ -78,7 +78,8 @@ def send_help(message):
     help_text = """
     Here are the commands you can use:
     /start, /hello - Start the bot and add your username to the group members.
-    /add [username] or /add [@username] - Add a specified username or mention to the group members list.
+    /add @username - Add a specified user to the group members list by mentioning them. 
+    /add ME - Add yourself to the group members list.
     /members - Show the list of all group members.
     /daily - Declare your daily LeetCode completion.
     /username - Check your current Telegram username.
@@ -86,6 +87,7 @@ def send_help(message):
     /help - Display this help text.
     """
     bot.send_message(message.chat.id, help_text)
+
 
 
 
