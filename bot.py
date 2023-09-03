@@ -93,9 +93,22 @@ def send_help(message):
 def add_member(message):
     try:
         member_name = message.text.split()[1]  # Extract the member name after the '/add' command
+
+        # If the user inputs "ME", use their own username
+        if member_name.upper() == "ME":
+            member_name = message.from_user.username
+
+        # Check if the member is already in the list
+        elif member_name in group_members:
+            bot.reply_to(message, f"The user {member_name} is already in the list.")
+            return
         
-        # Remove the @ symbol if it exists at the beginning of the username
-        if member_name.startswith('@'):
+        # If the input doesn't start with '@' and isn't "ME", reject it
+        elif not member_name.startswith('@'):
+            bot.reply_to(message, "Please provide a valid member name or mention starting with '@' or use 'ME' to add yourself.")
+            return
+        else:
+            # Remove the @ symbol
             member_name = member_name[1:]
         
         group_members.add(member_name)
@@ -105,6 +118,7 @@ def add_member(message):
         bot.send_message(message.chat.id, f"Added [{member_name}](tg://user?id={member_name}) to the group members list.", parse_mode='Markdown')
     except IndexError:
         bot.reply_to(message, "Please provide a member name after the /add command.")
+
 
     
 @bot.message_handler(commands=['daily'])
@@ -142,14 +156,14 @@ def check_username(message):
 def check_time():
     while True:
         now = datetime.now()
-        if now.hour == 5 and now.minute == 0:
+        if now.hour >= 5 and now.minute >= 0:
             for user in group_members:
                 if not daily_progress.get(user, False):  # If the user hasn't marked their progress
                     penalties[user] = penalties.get(user, 0) + 10  # Add $10 penalty
             daily_progress.clear()  # Reset daily progress for the next day
             save_data()
             bot.send_message(-801071288, "Checked daily LeetCode progress and penalties have been updated!")
-            time.sleep(60)  # Sleep for 60 seconds to avoid multiple notifications
+            time.sleep(30)  # Sleep for 60 seconds to avoid multiple notifications
         else:
             time.sleep(10)  # Sleep for 10 seconds before checking again
 
