@@ -182,6 +182,19 @@ def check_username(message):
     else:
         bot.reply_to(message, "Error: You don't have a username set on Telegram. Please set one in your Telegram settings.")
 
+@bot.message_handler(commands=['clearCredits'])
+def clear_credits(message):
+    user_name = message.from_user.username
+    if user_name:
+        if credits.get(user_name, 0) == 0:
+            bot.reply_to(message, "You have no credits to clear.")
+        else:
+            credits[user_name] = 0
+            save_data()
+            bot.reply_to(message, "Your credits have been cleared.")
+    else:
+        bot.reply_to(message, "Error: Couldn't retrieve your username. Please ensure you have a username set on Telegram.")
+
 
 def check_time():
     while True:
