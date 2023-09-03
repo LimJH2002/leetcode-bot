@@ -25,4 +25,3 @@ This bot helps groups track their daily LeetCode progress. Users can declare the
 2. Ensure you have all the required packages installed.
 3. Set the `BOT_TOKEN` environment variable to your Telegram bot token.
 4. Run the bot script.
-
