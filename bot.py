@@ -98,13 +98,15 @@ def send_help(message):
     /start, /hello - Start the bot and add your username to the group members.
     /add @username - Add a specified user to the group members list by mentioning them. 
     /add ME - Add yourself to the group members list.
-    /members - Show the list of all group members with their penalties and credits.
-    /daily - Declare your daily LeetCode completion. If you have completed more than 3 dailies, you earn credits.
+    /members - Show the list of all group members.
+    /daily - Declare your daily LeetCode completion and see your current credits.
     /username - Check your current Telegram username.
     /status - Check your daily progress, penalties, and credits.
+    /clearCredits - Clear your saved credits.
     /help - Display this help text.
     """
     bot.send_message(message.chat.id, help_text)
+
 
 
 @bot.message_handler(commands=['add'])
