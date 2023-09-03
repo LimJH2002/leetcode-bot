@@ -163,10 +163,19 @@ def check_time():
                     penalties[user] = penalties.get(user, 0) + 10  # Add $10 penalty
             daily_progress.clear()  # Reset daily progress for the next day
             save_data()
-            bot.send_message(-801071288, "Checked daily LeetCode progress and penalties have been updated!")
-            time.sleep(30)  # Sleep for 60 seconds to avoid multiple notifications
+
+            # Prepare the list of members and their penalties
+            members_list = []
+            for member in group_members:
+                penalty = penalties.get(member, 0)
+                members_list.append(f"{member} - Penalty: ${penalty}")
+            response = "Checked daily LeetCode progress and penalties have been updated!\n\nGroup members and penalties:\n" + '\n'.join(members_list)
+            
+            bot.send_message(-801071288, response)
+            time.sleep(30)  # Sleep for 30 seconds to avoid multiple notifications
         else:
             time.sleep(10)  # Sleep for 10 seconds before checking again
+
 
 thread = threading.Thread(target=check_time)
 thread.start()
