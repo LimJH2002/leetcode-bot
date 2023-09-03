@@ -3,6 +3,7 @@ import telebot
 import threading
 import time
 from datetime import datetime
+from keep_alive import keep_alive
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -210,7 +211,7 @@ def check_time():
             time.sleep(10)  # Sleep for 10 seconds before checking again
 
 
-
+keep_alive()
 thread = threading.Thread(target=check_time)
 thread.start()
 
