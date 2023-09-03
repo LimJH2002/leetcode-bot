@@ -1,27 +1,22 @@
-# LeetCode Daily Progress Telegram Bot
+# LeetCode Daily Checker Bot
 
-This bot helps groups track their daily LeetCode progress. Users can declare their daily completion, check their status, and incur penalties for missing their daily target.
+This Telegram bot helps groups of friends stay motivated in their LeetCode challenges. Users declare their daily LeetCode completion, and the bot keeps track of progress, applying penalties for missed days, while rewarding consistent completion with credits.
 
-## Features
+## Features:
+1. **User Addition**: New users can join by sending `/start` or `/hello`. Users can also add others or themselves using `/add @username` or `/add ME`.
+2. **Daily Completion**: Users declare their daily LeetCode completion using `/daily`. Completing more than 3 dailies consecutively earns them credits.
+3. **Penalties & Credits**: If a user misses a day, they get a $10 penalty. However, if they have credits (from consistent completion), a credit will be used instead of applying a penalty.
+4. **Status Check**: Using `/status`, users can check their daily progress, penalties, and available credits.
+5. **Group Overview**: `/members` provides a list of all group members, their penalties, and credits.
 
-1. **User Registration**: Users can be added to the tracking list either by interacting with the bot or by being added by another user using the `/add` command.
-2. **Daily Progress Tracking**: Users can declare their daily LeetCode completion using the `/daily` command.
-3. **Penalties**: At a specified time each day (currently set to 5am), the bot checks the progress of all registered users. Those who have not declared their daily completion incur a penalty.
-4. **Status Checking**: Users can check their daily progress and total penalties using the `/status` command.
-
-## Commands
-
-- `/start`, `/hello`: Start the bot and add your username to the group members.
-- `/add [username]` or `/add [@username]`: Add a specified username or mention to the group members list.
-- `/members`: Show the list of all group members along with their penalties.
-- `/daily`: Declare your daily LeetCode completion.
+## Commands:
+- `/start, /hello`: Greet the bot and get added to the group members.
+- `/add @username`: Add a user to the group members by mentioning them.
+- `/add ME`: Add yourself to the group members list.
+- `/members`: Show all group members, their penalties, and credits.
+- `/daily`: Declare your daily LeetCode completion and check your credits.
 - `/username`: Check your current Telegram username.
-- `/status`: Check your daily progress and penalties.
-- `/help`: Display the list of available commands.
+- `/status`: Check your daily progress, penalties, and credits.
+- `/help`: Display the available commands.
 
-## Installation and Setup
-
-1. Clone the repository.
-2. Ensure you have all the required packages installed.
-3. Set the `BOT_TOKEN` environment variable to your Telegram bot token.
-4. Run the bot script.
+Stay motivated and happy coding!
