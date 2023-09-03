@@ -102,6 +102,15 @@ def show_members(message):
     else:
         bot.send_message(message.chat.id, "No members have been added yet.")
 
+@bot.message_handler(commands=['username'])
+def check_username(message):
+    user_name = message.from_user.username
+    if user_name:
+        bot.reply_to(message, f"Your Telegram username is: @{user_name}")
+    else:
+        bot.reply_to(message, "Error: You don't have a username set on Telegram. Please set one in your Telegram settings.")
+
+
 def check_time():
     while True:
         now = datetime.now()
