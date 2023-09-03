@@ -7,6 +7,7 @@ from datetime import datetime
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)
 
+# Functions to handle saving and loading data
 def save_members():
     with open("members.txt", "w") as f:
         for member in group_members:
@@ -27,10 +28,15 @@ def save_data():
     with open("penalties.txt", "w") as pen_file:
         for user, penalty in penalties.items():
             pen_file.write(f"{user},{penalty}\n")
+    
+    with open("credits.txt", "w") as cred_file:
+        for user, credit in credits.items():
+            cred_file.write(f"{user},{credit}\n")
 
 def load_data():
     daily_progress = {}
     penalties = {}
+    credits = {}
 
     try:
         with open("daily_progress.txt", "r") as dp_file:
@@ -48,11 +54,21 @@ def load_data():
     except FileNotFoundError:
         pass
 
-    return daily_progress, penalties
+    try:
+        with open("credits.txt", "r") as cred_file:
+            for line in cred_file:
+                user, credit = line.strip().split(',')
+                credits[user] = int(credit)
+    except FileNotFoundError:
+        pass
 
+    return daily_progress, penalties, credits
+
+# Load members and data on startup
 group_members = load_members()
-daily_progress, penalties = load_data()
+daily_progress, penalties, credits = load_data()
 
+# Telebot command handlers
 @bot.message_handler(commands=['start', 'hello'])
 def send_welcome(message):
     user_name = message.from_user.username
@@ -67,9 +83,10 @@ def check_status(message):
     if user_name:
         progress = daily_progress.get(user_name, False)
         penalty = penalties.get(user_name, 0)
+        credit = credits.get(user_name, 0)
         
         progress_status = "completed" if progress else "not completed"
-        bot.reply_to(message, f"Your daily LeetCode progress: {progress_status}\nYour total penalties: ${penalty}")
+        bot.reply_to(message, f"Your daily LeetCode progress: {progress_status}\nYour total penalties: ${penalty}\nYour available credits: {credit}")
     else:
         bot.reply_to(message, "Error: Couldn't retrieve your username. Please ensure you have a username set on Telegram.")
 
@@ -83,12 +100,10 @@ def send_help(message):
     /members - Show the list of all group members.
     /daily - Declare your daily LeetCode completion.
     /username - Check your current Telegram username.
-    /status - Check your daily progress and penalties.
+    /status - Check your daily progress, penalties, and available credits.
     /help - Display this help text.
     """
     bot.send_message(message.chat.id, help_text)
-
-
 
 @bot.message_handler(commands=['add'])
 def add_member(message):
@@ -120,15 +135,19 @@ def add_member(message):
     except IndexError:
         bot.reply_to(message, "Please provide a member's Telegram username after the /add command.")
 
-
-    
 @bot.message_handler(commands=['daily'])
 def daily_declaration(message):
     user_name = message.from_user.username
     if user_name:
-        daily_progress[user_name] = True  # Mark the user's progress for the day as complete
+        if daily_progress.get(user_name, False):  # If the user has already marked their progress for today
+            credits[user_name] = credits.get(user_name, 0) + 1  # Grant a credit
+            if credits[user_name] > 3:  # Cap the credits at 3
+                credits[user_name] = 3
+            bot.reply_to(message, "You've already declared your completion for today. A credit has been added. Remember, you can have a maximum of 3 credits.")
+        else:
+            daily_progress[user_name] = True  # Mark the user's progress for the day as complete
+            bot.reply_to(message, "Your LeetCode completion for today has been recorded. Well done!")
         save_data()
-        bot.reply_to(message, "Your LeetCode completion for today has been recorded. Well done!")
     else:
         bot.reply_to(message, "Error: Couldn't retrieve your username. Please ensure you have a username set on Telegram.")
 
@@ -138,12 +157,12 @@ def show_members(message):
         members_list = []
         for member in group_members:
             penalty = penalties.get(member, 0)
-            members_list.append(f"{member} - Penalty: ${penalty}")
-        response = "Group members and penalties:\n" + '\n'.join(members_list)
+            credit = credits.get(member, 0)
+            members_list.append(f"{member} - Penalty: ${penalty} - Credits: {credit}")
+        response = "Group members, penalties, and credits:\n" + '\n'.join(members_list)
         bot.send_message(message.chat.id, response)
     else:
         bot.send_message(message.chat.id, "No members have been added yet.")
-
 
 @bot.message_handler(commands=['username'])
 def check_username(message):
