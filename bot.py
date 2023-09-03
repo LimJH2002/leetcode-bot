@@ -70,9 +70,11 @@ def send_help(message):
     /add [username] - Add a specified username to the group members list.
     /members - Show the list of all group members.
     /daily - Declare your daily LeetCode completion.
+    /username - Check your current Telegram username.
     /help - Display this help text.
     """
     bot.send_message(message.chat.id, help_text)
+
 
 @bot.message_handler(commands=['add'])
 def add_member(message):
