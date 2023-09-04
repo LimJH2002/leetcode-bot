@@ -35,7 +35,7 @@ def load_members(chat_id):
     except FileNotFoundError:
         return set()
 
-def save_data(chat_id):
+def save_data(chat_id, daily_progress, penalties, credits):
     ensure_directory_exists(str(chat_id))
     with open(f"{chat_id}/daily_progress.txt", "w") as dp_file:
         for user, progress in daily_progress.items():
