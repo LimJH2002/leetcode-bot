@@ -278,9 +278,8 @@ def check_time():
         
         time.sleep(60)  # Sleep for 10 seconds before checking again
 
-
-keep_alive()
-thread = threading.Thread(target=check_time)
-thread.start()
-
-bot.infinity_polling()
+if __name__ == "__main__":
+    keep_alive()
+    thread = threading.Thread(target=check_time)
+    thread.start()
+    bot.infinity_polling()
