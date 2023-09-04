@@ -216,59 +216,61 @@ def check_username(message):
 
 @bot.message_handler(commands=['clearCredits'])
 def clear_credits(message):
+    chat_id = str(message.chat.id)
+    _, penalties[chat_id], credits[chat_id] = load_data(chat_id)
+
     user_name = message.from_user.username
     if user_name:
-        if credits.get(user_name, 0) == 0:
+        if credits[chat_id].get(user_name, 0) == 0:
             bot.reply_to(message, "You have no credits to clear.")
         else:
-            credits[user_name] = 0
-            save_data()
+            credits[chat_id][user_name] = 0
+            save_data(chat_id, daily_progress[chat_id], penalties[chat_id], credits[chat_id])
             bot.reply_to(message, "Your credits have been cleared.")
     else:
         bot.reply_to(message, "Error: Couldn't retrieve your username. Please ensure you have a username set on Telegram.")
 
-
 def check_time():
-    daily_progress_checked = False  # This flag will help us ensure the daily progress is checked only once per day.
+    daily_progress_checked = {}  # This will store the check status for each chat group.
     while True:
         # Get the current time in GMT+8 timezone
         tz = pytz.timezone('Asia/Singapore')
         now = datetime.now(tz)
-        print(now)
 
-        # At 1 PM GMT+8, remind users who haven't done their dailies
-        if now.hour == 13 and now.minute <= 20:
-            for user in group_members:
-                if not daily_progress.get(user, False):
-                    bot.send_message(-801071288, f"@{user}, remember to complete your daily LeetCode challenge!")
-            time.sleep(3601)  # Sleep for 3600 seconds to avoid multiple reminders
+        for chat_id in group_members:
+            if now.hour == 13 and now.minute <= 20:
+                daily_progress[chat_id], _, _ = load_data(chat_id)
+                for user in group_members[chat_id]:
+                    if not daily_progress[chat_id].get(user, False):
+                        bot.send_message(chat_id, f"@{user}, remember to complete your daily LeetCode challenge!")
+                time.sleep(3601)  # Sleep for 3600 seconds to avoid multiple reminders
         
-        # At 5 AM GMT+8, check daily progress and update penalties, but only if it hasn't been checked for the day
-        elif now.hour == 5 and now.minute == 0 and not daily_progress_checked:
-            daily_progress_checked = True  # Mark that we've checked progress for today.
-            for user in group_members:
-                if not daily_progress.get(user, False):  # If the user hasn't marked their progress
-                    penalties[user] = penalties.get(user, 0) + 10  # Add $10 penalty
-            daily_progress.clear()  # Reset daily progress for the next day
-            save_data()
+            # At 5 AM GMT+8, check daily progress and update penalties, but only if it hasn't been checked for the day
+            elif now.hour >= 5 and now.minute == 0 and not daily_progress_checked.get(chat_id, False):
+                daily_progress[chat_id], penalties[chat_id], _ = load_data(chat_id)
+                daily_progress_checked[chat_id] = True  # Mark that we've checked progress for today.
+                for user in group_members[chat_id]:
+                    if not daily_progress[chat_id].get(user, False):  # If the user hasn't marked their progress
+                        penalties[chat_id][user] = penalties[chat_id].get(user, 0) + 10  # Add $10 penalty
+                daily_progress[chat_id].clear()  # Reset daily progress for the next day
+                save_data(chat_id, daily_progress[chat_id], penalties[chat_id], credits[chat_id])
 
-            # Prepare the list of members and their penalties
-            members_list = []
-            for member in group_members:
-                penalty = penalties.get(member, 0)
-                members_list.append(f"{member} - Penalty: ${penalty}")
-            response = "Checked daily LeetCode progress and penalties have been updated!\n\nGroup members and penalties:\n" + '\n'.join(members_list)
+                # Prepare the list of members and their penalties
+                members_list = []
+                for member in group_members[chat_id]:
+                    penalty = penalties[chat_id].get(member, 0)
+                    members_list.append(f"{member} - Penalty: ${penalty}")
+                response = "Checked daily LeetCode progress and penalties have been updated!\n\nGroup members and penalties:\n" + '\n'.join(members_list)
             
-            bot.send_message(-801071288, response)
-            time.sleep(60)  # Sleep for 60 seconds to avoid multiple notifications
+                bot.send_message(chat_id, response)
+                time.sleep(60)  # Sleep for 60 seconds to avoid multiple notifications
         
-        # At 0 AM GMT+8, reset the flag for daily progress check
-        elif now.hour == 0 and now.minute == 0:
-            daily_progress_checked = False
-            time.sleep(60)
+            # At 0 AM GMT+8, reset the flag for daily progress check
+            elif now.hour == 0 and now.minute == 0:
+                daily_progress_checked[chat_id] = False
+                time.sleep(60)
         
-        else:
-            time.sleep(60)  # Sleep for 10 seconds before checking again
+        time.sleep(60)  # Sleep for 10 seconds before checking again
 
 
 keep_alive()
