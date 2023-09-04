@@ -14,10 +14,10 @@ def ensure_directory_exists(directory_name):
         os.makedirs(directory_name)
 
 # Functions to handle saving and loading data
-def save_members(chat_id):
+def save_members(chat_id, members):
     ensure_directory_exists(str(chat_id))
     with open(f"{chat_id}/members.txt", "w") as f:
-        for member in group_members:
+        for member in members:
             f.write(f"{member}\n")
 
 def load_members(chat_id):
@@ -108,6 +108,9 @@ def send_welcome(message):
 
 @bot.message_handler(commands=['status'])
 def check_status(message):
+    chat_id = message.chat.id
+    daily_progress, penalties, credits = load_data(chat_id)
+    
     user_name = message.from_user.username
     if user_name:
         progress = daily_progress.get(user_name, False)
@@ -118,6 +121,7 @@ def check_status(message):
         bot.reply_to(message, f"Your daily LeetCode progress: {progress_status}\nYour total penalties: ${penalty}\nYour available credits: {credit}")
     else:
         bot.reply_to(message, "Error: Couldn't retrieve your username. Please ensure you have a username set on Telegram.")
+
 
 @bot.message_handler(commands=['help'])
 def send_help(message):
