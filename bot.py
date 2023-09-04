@@ -140,69 +140,65 @@ def send_help(message):
     bot.send_message(message.chat.id, help_text)
 
 
-
 @bot.message_handler(commands=['add'])
 def add_member(message):
+    chat_id = str(message.chat.id)
+    group_members[chat_id] = load_members(chat_id)
     try:
-        member_name = message.text.split()[1]  # Extract the member name after the '/add' command
-
-        # If the user inputs "ME", use their own username
+        member_name = message.text.split()[1]
         if member_name.upper() == "ME":
             member_name = message.from_user.username
-
-        # Check if the member is already in the list
-        elif member_name in group_members:
+        elif member_name in group_members[chat_id]:
             bot.reply_to(message, f"The user {member_name} is already in the list.")
             return
-        
-        # If the input doesn't start with '@' and isn't "ME", reject it
         elif not member_name.startswith('@'):
             bot.reply_to(message, "Please provide a valid member's Telegram username or mention starting with '@' or use 'ME' to add yourself.")
             return
         else:
-            # Remove the @ symbol
             member_name = member_name[1:]
-        
-        group_members.add(member_name)
-        save_members()  # Save the updated list
-
-        # Send a message mentioning the added user
+        group_members[chat_id].add(member_name)
+        save_members(chat_id, group_members[chat_id])
         bot.send_message(message.chat.id, f"Added [{member_name}](tg://user?id={member_name}) to the group members list.", parse_mode='Markdown')
     except IndexError:
         bot.reply_to(message, "Please provide a member's Telegram username after the /add command.")
+        
 
 @bot.message_handler(commands=['daily'])
 def daily_declaration(message):
+    chat_id = str(message.chat.id)
+    daily_progress[chat_id], penalties[chat_id], credits[chat_id] = load_data(chat_id)
+    
     user_name = message.from_user.username
     if user_name:
         # If the user has already declared their daily completion
-        if daily_progress.get(user_name, False):
-            credits[user_name] = min(3, credits.get(user_name, 0) + 1)
-            if credits[user_name] == 3:
+        if daily_progress[chat_id].get(user_name, False):
+            credits[chat_id][user_name] = min(3, credits[chat_id].get(user_name, 0) + 1)
+            if credits[chat_id][user_name] == 3:
                 bot.reply_to(message, "You've already completed your daily LeetCode! You've also maxed out your credits at 3.")
-                return
             else:
-                save_data()
-                bot.reply_to(message, f"You've already completed your daily LeetCode! You now have {credits[user_name]} credits.")
-                return
+                save_data(chat_id, daily_progress[chat_id], penalties[chat_id], credits[chat_id])
+                bot.reply_to(message, f"You've already completed your daily LeetCode! You now have {credits[chat_id][user_name]} credits.")
+            return
         
         # Mark the user's progress for the day as complete
-        daily_progress[user_name] = True
-        current_credits = credits.get(user_name, 0)
-        save_data()
-        bot.reply_to(message, f"Your LeetCode completion for today has been recorded. Well done! You have {current_credits} credits.")
+        daily_progress[chat_id][user_name] = True
+        save_data(chat_id, daily_progress[chat_id], penalties[chat_id], credits[chat_id])
+        bot.reply_to(message, f"Your LeetCode completion for today has been recorded. Well done!")
     else:
         bot.reply_to(message, "Error: Couldn't retrieve your username. Please ensure you have a username set on Telegram.")
 
-
 @bot.message_handler(commands=['members'])
 def show_members(message):
-    if group_members:
+    chat_id = str(message.chat.id)
+    group_members[chat_id] = load_members(chat_id)
+    daily_progress[chat_id], penalties[chat_id], credits[chat_id] = load_data(chat_id)
+    
+    if group_members[chat_id]:
         members_list = []
-        for member in group_members:
-            penalty = penalties.get(member, 0)
-            credit = credits.get(member, 0)
-            daily_status = "Completed" if daily_progress.get(member, False) else "Not Completed"
+        for member in group_members[chat_id]:
+            penalty = penalties[chat_id].get(member, 0)
+            credit = credits[chat_id].get(member, 0)
+            daily_status = "Completed" if daily_progress[chat_id].get(member, False) else "Not Completed"
             members_list.append(f"{member} - Daily: {daily_status} - Penalty: ${penalty} - Credits: {credit}")
         response = "Group members, daily status, penalties, and credits:\n" + '\n'.join(members_list)
         bot.send_message(message.chat.id, response)
