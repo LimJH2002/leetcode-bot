@@ -9,6 +9,24 @@ from keep_alive import keep_alive
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)
 
+def ensure_directory_exists(directory_name):
+    if not os.path.exists(directory_name):
+        os.makedirs(directory_name)
+
+def save_data(chat_id):
+    ensure_directory_exists(str(chat_id))
+    with open(f"{chat_id}/daily_progress.txt", "w") as dp_file:
+        for user, progress in daily_progress.items():
+            dp_file.write(f"{user},{progress}\n")
+
+    with open(f"{chat_id}/penalties.txt", "w") as pen_file:
+        for user, penalty in penalties.items():
+            pen_file.write(f"{user},{penalty}\n")
+    
+    with open(f"{chat_id}/credits.txt", "w") as cred_file:
+        for user, credit in credits.items():
+            cred_file.write(f"{user},{credit}\n")
+
 # Functions to handle saving and loading data
 def save_members():
     with open("members.txt", "w") as f:
