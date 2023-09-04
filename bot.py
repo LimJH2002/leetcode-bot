@@ -69,6 +69,18 @@ def load_data():
 group_members = load_members()
 daily_progress, penalties, credits = load_data()
 
+def save_check_status(status):
+    with open("check_status.txt", "w") as f:
+        f.write(status)
+
+def load_check_status():
+    try:
+        with open("check_status.txt", "r") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return "not_checked"
+
+
 # Telebot command handlers
 @bot.message_handler(commands=['start', 'hello'])
 def send_welcome(message):
@@ -201,29 +213,31 @@ def clear_credits(message):
 def check_time():
     while True:
         now = datetime.now()
-        if now.hour == 5 and now.minute == 0:
+        check_status = load_check_status()
+        
+        if now.hour >= 5 and check_status == "not_checked":
             for user in group_members:
                 if not daily_progress.get(user, False):  # If the user hasn't marked their progress
-                    # Check if they have credits to use
-                    if credits.get(user, 0) > 0:
-                        credits[user] -= 1  # Deduct one credit
-                    else:
-                        penalties[user] = penalties.get(user, 0) + 10  # Add $10 penalty
+                    penalties[user] = penalties.get(user, 0) + 10  # Add $10 penalty
             daily_progress.clear()  # Reset daily progress for the next day
             save_data()
 
-            # Prepare the list of members, their penalties, and their credits
+            # Prepare the list of members and their penalties
             members_list = []
             for member in group_members:
                 penalty = penalties.get(member, 0)
-                member_credits = credits.get(member, 0)
-                members_list.append(f"{member} - Penalty: ${penalty}, Credits: {member_credits}")
+                credit = credits.get(member, 0)
+                members_list.append(f"{member} - Penalty: ${penalty} - Credits: {credit}")
             response = "Checked daily LeetCode progress and penalties have been updated!\n\nGroup members, penalties, and credits:\n" + '\n'.join(members_list)
             
             bot.send_message(-801071288, response)
             time.sleep(30)  # Sleep for 30 seconds to avoid multiple notifications
-        else:
-            time.sleep(10)  # Sleep for 10 seconds before checking again
+            
+            save_check_status("checked")
+        elif now.hour < 5:  # Reset the flag when it's before 5 am
+            save_check_status("not_checked")
+
+        time.sleep(10)  # Sleep for 10 seconds before checking again
 
 
 keep_alive()
