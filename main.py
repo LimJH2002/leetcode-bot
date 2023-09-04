@@ -84,16 +84,15 @@ def load_data(chat_id):
 
 
 def save_check_status(chat_id, status):
-    with open(f"check_status_{chat_id}.txt", "w") as f:
+    with open(f"{chat_id}/check_status.txt", "w") as f:
         f.write(status)
 
 def load_check_status(chat_id):
     try:
-        with open(f"check_status_{chat_id}.txt", "r") as f:
+        with open(f"{chat_id}/check_status.txt", "r") as f:
             return f.read().strip()
     except FileNotFoundError:
         return "not_checked"
-
 
 
 # Telebot command handlers
