@@ -219,9 +219,10 @@ def check_time():
         # Get the current time in GMT+8 timezone
         tz = pytz.timezone('Asia/Singapore')
         now = datetime.now(tz)
+        print(now)
 
         # At 1 PM GMT+8, remind users who haven't done their dailies
-        if now.hour == 13 and now.minute >= 0:
+        if now.hour == 13 and now.minute <= 20:
             for user in group_members:
                 if not daily_progress.get(user, False):
                     bot.send_message(-801071288, f"@{user}, remember to complete your daily LeetCode challenge!")
@@ -252,7 +253,7 @@ def check_time():
             time.sleep(60)
         
         else:
-            time.sleep(10)  # Sleep for 10 seconds before checking again
+            time.sleep(60)  # Sleep for 10 seconds before checking again
 
 
 keep_alive()
