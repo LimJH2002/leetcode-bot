@@ -9,6 +9,13 @@ from keep_alive import keep_alive
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)
 
+# Initialize empty dictionaries for members and data
+group_members = {}
+daily_progress = {}
+penalties = {}
+credits = {}
+daily_refresh_checked = {}
+
 def ensure_directory_exists(directory_name):
     if not os.path.exists(directory_name):
         os.makedirs(directory_name)
@@ -231,7 +238,6 @@ def clear_credits(message):
         bot.reply_to(message, "Error: Couldn't retrieve your username. Please ensure you have a username set on Telegram.")
 
 def check_time():
-    daily_progress_checked = {}  # This will store the check status for each chat group.
     while True:
         # Get the current time in GMT+8 timezone
         tz = pytz.timezone('Asia/Singapore')
@@ -246,9 +252,9 @@ def check_time():
                 time.sleep(3601)  # Sleep for 3600 seconds to avoid multiple reminders
         
             # At 5 AM GMT+8, check daily progress and update penalties, but only if it hasn't been checked for the day
-            elif now.hour >= 5 and now.minute == 0 and not daily_progress_checked.get(chat_id, False):
+            elif now.hour >= 5 and now.minute == 0 and not daily_refresh_checked.get(chat_id, False):
                 daily_progress[chat_id], penalties[chat_id], _ = load_data(chat_id)
-                daily_progress_checked[chat_id] = True  # Mark that we've checked progress for today.
+                daily_refresh_checked[chat_id] = True  # Mark that we've checked progress for today.
                 for user in group_members[chat_id]:
                     if not daily_progress[chat_id].get(user, False):  # If the user hasn't marked their progress
                         penalties[chat_id][user] = penalties[chat_id].get(user, 0) + 10  # Add $10 penalty
@@ -267,7 +273,7 @@ def check_time():
         
             # At 0 AM GMT+8, reset the flag for daily progress check
             elif now.hour == 0 and now.minute == 0:
-                daily_progress_checked[chat_id] = False
+                daily_refresh_checked[chat_id] = False
                 time.sleep(60)
         
         time.sleep(60)  # Sleep for 10 seconds before checking again
