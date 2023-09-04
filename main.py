@@ -248,9 +248,9 @@ def check_time():
                 time.sleep(3601)  # Sleep for 3600 seconds to avoid multiple reminders
         
             # At 5 AM GMT+8, check daily progress and update penalties, but only if it hasn't been checked for the day
-            elif now.hour >= 5 and now.minute == 0 and not daily_refresh_checked.get(chat_id, False):
+            elif now.hour >= 5 and now.minute == 0 and load_check_status(chat_id) == "not_checked":
                 daily_progress[chat_id], penalties[chat_id], _ = load_data(chat_id)
-                daily_refresh_checked[chat_id] = True  # Mark that we've checked progress for today.
+                save_check_status(chat_id, "checked")  # Mark that we've checked progress for today.
                 for user in group_members[chat_id]:
                     if not daily_progress[chat_id].get(user, False):  # If the user hasn't marked their progress
                         penalties[chat_id][user] = penalties[chat_id].get(user, 0) + 10  # Add $10 penalty
@@ -268,8 +268,8 @@ def check_time():
                 time.sleep(60)  # Sleep for 60 seconds to avoid multiple notifications
         
             # At 0 AM GMT+8, reset the flag for daily progress check
-            elif now.hour == 0 and now.minute == 0:
-                daily_refresh_checked[chat_id] = False
+            elif now.hour == 5 and now.minute >= 0 and now.minute <= 5:
+                save_check_status(chat_id, "not_checked")
                 time.sleep(60)
         
         time.sleep(60)  # Sleep for 10 seconds before checking again
