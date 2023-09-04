@@ -13,6 +13,19 @@ def ensure_directory_exists(directory_name):
     if not os.path.exists(directory_name):
         os.makedirs(directory_name)
 
+# Functions to handle saving and loading data
+def save_members():
+    with open("members.txt", "w") as f:
+        for member in group_members:
+            f.write(f"{member}\n")
+
+def load_members():
+    try:
+        with open("members.txt", "r") as f:
+            return set(line.strip() for line in f)
+    except FileNotFoundError:
+        return set()
+
 def save_data(chat_id):
     ensure_directory_exists(str(chat_id))
     with open(f"{chat_id}/daily_progress.txt", "w") as dp_file:
@@ -27,31 +40,6 @@ def save_data(chat_id):
         for user, credit in credits.items():
             cred_file.write(f"{user},{credit}\n")
 
-# Functions to handle saving and loading data
-def save_members():
-    with open("members.txt", "w") as f:
-        for member in group_members:
-            f.write(f"{member}\n")
-
-def load_members():
-    try:
-        with open("members.txt", "r") as f:
-            return set(line.strip() for line in f)
-    except FileNotFoundError:
-        return set()
-
-def save_data():
-    with open("daily_progress.txt", "w") as dp_file:
-        for user, progress in daily_progress.items():
-            dp_file.write(f"{user},{progress}\n")
-
-    with open("penalties.txt", "w") as pen_file:
-        for user, penalty in penalties.items():
-            pen_file.write(f"{user},{penalty}\n")
-    
-    with open("credits.txt", "w") as cred_file:
-        for user, credit in credits.items():
-            cred_file.write(f"{user},{credit}\n")
 
 def load_data(chat_id):
     ensure_directory_exists(str(chat_id))
