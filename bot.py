@@ -212,13 +212,22 @@ def clear_credits(message):
 
 
 def check_time():
+    daily_progress_checked = False  # This flag will help us ensure the daily progress is checked only once per day.
     while True:
         # Get the current time in GMT+8 timezone
         tz = pytz.timezone('Asia/Singapore')
         now = datetime.now(tz)
-        check_status = load_check_status()
+
+        # At 1 PM GMT+8, remind users who haven't done their dailies
+        if now.hour == 13 and now.minute >= 0:
+            for user in group_members:
+                if not daily_progress.get(user, False):
+                    bot.send_message(-801071288, f"@{user}, remember to complete your daily LeetCode challenge!")
+            time.sleep(3601)  # Sleep for 3600 seconds to avoid multiple reminders
         
-        if now.hour >= 5 and check_status == "not_checked":
+        # At 5 AM GMT+8, check daily progress and update penalties, but only if it hasn't been checked for the day
+        elif now.hour == 5 and now.minute == 0 and not daily_progress_checked:
+            daily_progress_checked = True  # Mark that we've checked progress for today.
             for user in group_members:
                 if not daily_progress.get(user, False):  # If the user hasn't marked their progress
                     penalties[user] = penalties.get(user, 0) + 10  # Add $10 penalty
@@ -229,18 +238,19 @@ def check_time():
             members_list = []
             for member in group_members:
                 penalty = penalties.get(member, 0)
-                credit = credits.get(member, 0)
-                members_list.append(f"{member} - Penalty: ${penalty} - Credits: {credit}")
-            response = "Checked daily LeetCode progress and penalties have been updated!\n\nGroup members, penalties, and credits:\n" + '\n'.join(members_list)
+                members_list.append(f"{member} - Penalty: ${penalty}")
+            response = "Checked daily LeetCode progress and penalties have been updated!\n\nGroup members and penalties:\n" + '\n'.join(members_list)
             
             bot.send_message(-801071288, response)
-            time.sleep(30)  # Sleep for 30 seconds to avoid multiple notifications
-            
-            save_check_status("checked")
-        elif now.hour < 5:  # Reset the flag when it's before 5 am
-            save_check_status("not_checked")
-
-        time.sleep(10)  # Sleep for 10 seconds before checking again
+            time.sleep(60)  # Sleep for 60 seconds to avoid multiple notifications
+        
+        # At 0 AM GMT+8, reset the flag for daily progress check
+        elif now.hour == 0 and now.minute == 0:
+            daily_progress_checked = False
+            time.sleep(60)
+        
+        else:
+            time.sleep(10)  # Sleep for 10 seconds before checking again
 
 
 keep_alive()
