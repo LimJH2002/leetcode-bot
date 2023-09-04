@@ -83,20 +83,17 @@ def load_data(chat_id):
     return daily_progress, penalties, credits
 
 
-# # Load members and data on startup
-# group_members = load_members()
-# daily_progress, penalties, credits = load_data()
-
-def save_check_status(status):
-    with open("check_status.txt", "w") as f:
+def save_check_status(chat_id, status):
+    with open(f"check_status_{chat_id}.txt", "w") as f:
         f.write(status)
 
-def load_check_status():
+def load_check_status(chat_id):
     try:
-        with open("check_status.txt", "r") as f:
+        with open(f"check_status_{chat_id}.txt", "r") as f:
             return f.read().strip()
     except FileNotFoundError:
         return "not_checked"
+
 
 
 # Telebot command handlers
