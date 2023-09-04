@@ -3,6 +3,7 @@ import telebot
 import threading
 import time
 from datetime import datetime
+import pytz
 from keep_alive import keep_alive
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
@@ -212,7 +213,9 @@ def clear_credits(message):
 
 def check_time():
     while True:
-        now = datetime.now()
+        # Get the current time in GMT+8 timezone
+        tz = pytz.timezone('Asia/Singapore')
+        now = datetime.now(tz)
         check_status = load_check_status()
         
         if now.hour >= 5 and check_status == "not_checked":
