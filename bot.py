@@ -183,11 +183,13 @@ def show_members(message):
         for member in group_members:
             penalty = penalties.get(member, 0)
             credit = credits.get(member, 0)
-            members_list.append(f"{member} - Penalty: ${penalty} - Credits: {credit}")
-        response = "Group members, penalties, and credits:\n" + '\n'.join(members_list)
+            daily_status = "Completed" if daily_progress.get(member, False) else "Not Completed"
+            members_list.append(f"{member} - Daily: {daily_status} - Penalty: ${penalty} - Credits: {credit}")
+        response = "Group members, daily status, penalties, and credits:\n" + '\n'.join(members_list)
         bot.send_message(message.chat.id, response)
     else:
         bot.send_message(message.chat.id, "No members have been added yet.")
+
 
 @bot.message_handler(commands=['username'])
 def check_username(message):
