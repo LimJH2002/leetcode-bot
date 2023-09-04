@@ -14,14 +14,16 @@ def ensure_directory_exists(directory_name):
         os.makedirs(directory_name)
 
 # Functions to handle saving and loading data
-def save_members():
-    with open("members.txt", "w") as f:
+def save_members(chat_id):
+    ensure_directory_exists(str(chat_id))
+    with open(f"{chat_id}/members.txt", "w") as f:
         for member in group_members:
             f.write(f"{member}\n")
 
-def load_members():
+def load_members(chat_id):
+    ensure_directory_exists(str(chat_id))
     try:
-        with open("members.txt", "r") as f:
+        with open(f"{chat_id}/members.txt", "r") as f:
             return set(line.strip() for line in f)
     except FileNotFoundError:
         return set()
@@ -72,6 +74,7 @@ def load_data(chat_id):
         pass
 
     return daily_progress, penalties, credits
+
 
 # Load members and data on startup
 group_members = load_members()
