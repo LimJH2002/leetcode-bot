@@ -2,6 +2,8 @@
 
 The LeetCode Progress Bot assists coding groups with their LeetCode challenges, ensuring consistent progress. With the addition of a penalty and credit system, members are encouraged to complete problems daily.
 
+[**Access the Bot on Telegram: t.me/leetcode_police_bot**](https://t.me/leetcode_police_bot)
+
 ## Features:
 
 - **Daily Progress Tracking**: Members can declare their completion of daily challenges.
