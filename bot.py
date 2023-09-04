@@ -53,13 +53,14 @@ def save_data():
         for user, credit in credits.items():
             cred_file.write(f"{user},{credit}\n")
 
-def load_data():
+def load_data(chat_id):
+    ensure_directory_exists(str(chat_id))
     daily_progress = {}
     penalties = {}
     credits = {}
 
     try:
-        with open("daily_progress.txt", "r") as dp_file:
+        with open(f"{chat_id}/daily_progress.txt", "r") as dp_file:
             for line in dp_file:
                 user, progress = line.strip().split(',')
                 daily_progress[user] = progress == 'True'
@@ -67,7 +68,7 @@ def load_data():
         pass
 
     try:
-        with open("penalties.txt", "r") as pen_file:
+        with open(f"{chat_id}/penalties.txt", "r") as pen_file:
             for line in pen_file:
                 user, penalty = line.strip().split(',')
                 penalties[user] = int(penalty)
@@ -75,7 +76,7 @@ def load_data():
         pass
 
     try:
-        with open("credits.txt", "r") as cred_file:
+        with open(f"{chat_id}/credits.txt", "r") as cred_file:
             for line in cred_file:
                 user, credit = line.strip().split(',')
                 credits[user] = int(credit)
