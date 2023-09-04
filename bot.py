@@ -76,9 +76,9 @@ def load_data(chat_id):
     return daily_progress, penalties, credits
 
 
-# Load members and data on startup
-group_members = load_members()
-daily_progress, penalties, credits = load_data()
+# # Load members and data on startup
+# group_members = load_members()
+# daily_progress, penalties, credits = load_data()
 
 def save_check_status(status):
     with open("check_status.txt", "w") as f:
@@ -95,11 +95,16 @@ def load_check_status():
 # Telebot command handlers
 @bot.message_handler(commands=['start', 'hello'])
 def send_welcome(message):
+    chat_id = message.chat.id
+    group_members = load_members(chat_id)
+    daily_progress, penalties, credits = load_data(chat_id)
+    
     user_name = message.from_user.username
     if user_name:
         group_members.add(user_name)
-        save_members()
+        save_members(chat_id)
     bot.reply_to(message, "Howdy, how are you doing?")
+
 
 @bot.message_handler(commands=['status'])
 def check_status(message):
