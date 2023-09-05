@@ -301,12 +301,15 @@ def check_time():
                 save_reminded_chat_id(chat_id)
                 time.sleep(60)  # Sleep for 60 seconds to avoid multiple reminders
         
-            # At 5 AM GMT+8, check daily progress and update penalties, but only if it hasn't been checked for the day
+            # At 5 AM GMT+8, check daily progress and update penalties or deduct credits
             elif now.hour >= 5 and now.minute >= 0 and load_check_status(chat_id) == "not_checked":
                 daily_progress[chat_id], penalties[chat_id], credits[chat_id] = load_data(chat_id)
                 for user in group_members:
                     if not daily_progress[chat_id].get(user, False):  # If the user hasn't marked their progress
-                        penalties[chat_id][user] = penalties[chat_id].get(user, 0) + 10  # Add $10 penalty
+                        if credits[chat_id].get(user, 0) > 0:  # If user has credits
+                            credits[chat_id][user] -= 1  # Deduct a credit
+                        else:
+                            penalties[chat_id][user] = penalties[chat_id].get(user, 0) + 10  # Add $10 penalty
                 daily_progress[chat_id].clear()  # Reset daily progress for the next day
                 save_data(chat_id, daily_progress[chat_id], penalties[chat_id], credits[chat_id])
 
@@ -315,19 +318,21 @@ def check_time():
                 for member in group_members:
                     penalty = penalties[chat_id].get(member, 0)
                     members_list.append(f"{member} - Penalty: ${penalty}")
-                response = "Checked daily LeetCode progress and penalties have been updated!\n\nGroup members and penalties:\n" + '\n'.join(members_list)
+                response = "Checked daily LeetCode progress. Penalties have been updated or credits have been deducted!\n\nGroup members and penalties:\n" + '\n'.join(members_list)
             
                 bot.send_message(chat_id, response)
                 save_check_status(chat_id, "checked")  # Mark that we've checked progress for today.
                 time.sleep(60)  # Sleep for 60 seconds to avoid multiple notifications
         
             # At 0 AM GMT+8, reset the flag for daily progress check
-            elif now.hour == 4 and now.minute >= 50:
+            elif now.hour == 4 and now.minute >= 30:
+                print(now, "Resetting check status")
                 save_check_status(chat_id, "not_checked")
                 clear_reminded_chat_ids()
-                time.sleep(10)
+                time.sleep(60)
         
         time.sleep(60)  # Sleep for 10 seconds before checking again
+
 
 if __name__ == "__main__":
     keep_alive()
