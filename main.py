@@ -47,6 +47,11 @@ def load_reminded_chat_ids():
             return set(line.strip() for line in f)
     except FileNotFoundError:
         return set()
+    
+def clear_reminded_chat_ids():
+    """Clear all chat IDs from remind.txt."""
+    with open("remind.txt", "w") as f:
+        f.write("")
 
 # Functions to handle saving and loading data
 def save_members(chat_id, members):
@@ -283,15 +288,17 @@ def check_time():
         # Get the current time in GMT+8 timezone
         tz = pytz.timezone('Asia/Singapore')
         now = datetime.now(tz)
+        reminded_chat_ids = load_reminded_chat_ids()
 
         for chat_id in load_chat_ids():
             group_members = load_members(chat_id)
-            if now.hour == 13 and now.minute <= 20:
+            if now.hour == 13 and chat_id not in reminded_chat_ids:
                 daily_progress[chat_id], _, _ = load_data(chat_id)
                 for user in group_members:
                     if not daily_progress[chat_id].get(user, False):
                         bot.send_message(chat_id, f"@{user}, remember to complete your daily LeetCode challenge!")
-                time.sleep(3601)  # Sleep for 3600 seconds to avoid multiple reminders
+                save_reminded_chat_id(chat_id)
+                time.sleep(60)  # Sleep for 60 seconds to avoid multiple reminders
         
             # At 5 AM GMT+8, check daily progress and update penalties, but only if it hasn't been checked for the day
             elif now.hour >= 5 and now.minute >= 0 and load_check_status(chat_id) == "not_checked":
@@ -316,6 +323,7 @@ def check_time():
             # At 0 AM GMT+8, reset the flag for daily progress check
             elif now.hour == 4 and now.minute >= 50:
                 save_check_status(chat_id, "not_checked")
+                clear_reminded_chat_ids()
                 time.sleep(10)
         
         time.sleep(60)  # Sleep for 10 seconds before checking again
