@@ -33,6 +33,20 @@ def load_chat_ids():
             return set(line.strip() for line in f)
     except FileNotFoundError:
         return set()
+    
+# Functions to save and load reminded chat IDs
+def save_reminded_chat_id(chat_id):
+    """Save chat ID to remind.txt after sending a reminder."""
+    with open("remind.txt", "a") as f:
+        f.write(f"{chat_id}\n")
+
+def load_reminded_chat_ids():
+    """Load all reminded chat IDs from remind.txt."""
+    try:
+        with open("remind.txt", "r") as f:
+            return set(line.strip() for line in f)
+    except FileNotFoundError:
+        return set()
 
 # Functions to handle saving and loading data
 def save_members(chat_id, members):
