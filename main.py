@@ -236,9 +236,10 @@ def daily_declaration(message):
 @bot.message_handler(commands=['members'])
 def show_members(message):
     chat_id = message.chat.id
-    if chat_id not in load_chat_ids():
+    if str(chat_id) not in load_chat_ids():
         save_chat_id(chat_id)
     group_members[chat_id] = load_members(chat_id)
+    print(group_members[chat_id])
     daily_progress[chat_id], penalties[chat_id], credits[chat_id] = load_data(chat_id)
     
     if group_members[chat_id]:
