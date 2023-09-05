@@ -20,6 +20,20 @@ def ensure_directory_exists(directory_name):
     if not os.path.exists(directory_name):
         os.makedirs(directory_name)
 
+# Functions to save and load chat IDs
+def save_chat_id(chat_id):
+    """Save new chat ID to chat_id.txt."""
+    with open("chat_id.txt", "a") as f:
+        f.write(f"{chat_id}\n")
+
+def load_chat_ids():
+    """Load all chat IDs from chat_id.txt."""
+    try:
+        with open("chat_id.txt", "r") as f:
+            return set(line.strip() for line in f)
+    except FileNotFoundError:
+        return set()
+
 # Functions to handle saving and loading data
 def save_members(chat_id, members):
     ensure_directory_exists(str(chat_id))
