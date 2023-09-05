@@ -113,8 +113,9 @@ def load_check_status(chat_id):
 @bot.message_handler(commands=['start', 'hello'])
 def send_welcome(message):
     chat_id = message.chat.id
+    if chat_id not in load_chat_ids():
+        save_chat_id(chat_id)
     group_members = load_members(chat_id)
-    daily_progress, penalties, credits = load_data(chat_id)
     
     user_name = message.from_user.username
     if user_name:
@@ -126,6 +127,8 @@ def send_welcome(message):
 @bot.message_handler(commands=['status'])
 def check_status(message):
     chat_id = message.chat.id
+    if chat_id not in load_chat_ids():
+        save_chat_id(chat_id)
     daily_progress, penalties, credits = load_data(chat_id)
     
     user_name = message.from_user.username
@@ -142,6 +145,9 @@ def check_status(message):
 
 @bot.message_handler(commands=['help'])
 def send_help(message):
+    chat_id = message.chat.id
+    if chat_id not in load_chat_ids():
+        save_chat_id(chat_id)
     help_text = """
     Here are the commands you can use:
     /start, /hello - Start the bot and add your username to the group members.
@@ -159,7 +165,9 @@ def send_help(message):
 
 @bot.message_handler(commands=['add'])
 def add_member(message):
-    chat_id = str(message.chat.id)
+    chat_id = message.chat.id
+    if chat_id not in load_chat_ids():
+        save_chat_id(chat_id)
     group_members[chat_id] = load_members(chat_id)
     try:
         member_name = message.text.split()[1]
@@ -182,7 +190,9 @@ def add_member(message):
 
 @bot.message_handler(commands=['daily'])
 def daily_declaration(message):
-    chat_id = str(message.chat.id)
+    chat_id = message.chat.id
+    if chat_id not in load_chat_ids():
+        save_chat_id(chat_id)
     daily_progress[chat_id], penalties[chat_id], credits[chat_id] = load_data(chat_id)
     
     user_name = message.from_user.username
@@ -206,7 +216,9 @@ def daily_declaration(message):
 
 @bot.message_handler(commands=['members'])
 def show_members(message):
-    chat_id = str(message.chat.id)
+    chat_id = message.chat.id
+    if chat_id not in load_chat_ids():
+        save_chat_id(chat_id)
     group_members[chat_id] = load_members(chat_id)
     daily_progress[chat_id], penalties[chat_id], credits[chat_id] = load_data(chat_id)
     
@@ -225,6 +237,9 @@ def show_members(message):
 
 @bot.message_handler(commands=['username'])
 def check_username(message):
+    chat_id = message.chat.id
+    if chat_id not in load_chat_ids():
+        save_chat_id(chat_id)
     user_name = message.from_user.username
     if user_name:
         bot.reply_to(message, f"Your Telegram username is: @{user_name}")
@@ -233,7 +248,9 @@ def check_username(message):
 
 @bot.message_handler(commands=['clearCredits'])
 def clear_credits(message):
-    chat_id = str(message.chat.id)
+    chat_id = message.chat.id
+    if chat_id not in load_chat_ids():
+        save_chat_id(chat_id)
     _, penalties[chat_id], credits[chat_id] = load_data(chat_id)
 
     user_name = message.from_user.username
@@ -253,19 +270,19 @@ def check_time():
         tz = pytz.timezone('Asia/Singapore')
         now = datetime.now(tz)
 
-        for chat_id in group_members:
+        for chat_id in load_chat_ids():
+            group_members = load_members(chat_id)
             if now.hour == 13 and now.minute <= 20:
                 daily_progress[chat_id], _, _ = load_data(chat_id)
-                for user in group_members[chat_id]:
+                for user in group_members:
                     if not daily_progress[chat_id].get(user, False):
                         bot.send_message(chat_id, f"@{user}, remember to complete your daily LeetCode challenge!")
                 time.sleep(3601)  # Sleep for 3600 seconds to avoid multiple reminders
         
             # At 5 AM GMT+8, check daily progress and update penalties, but only if it hasn't been checked for the day
-            elif now.hour >= 5 and now.minute == 0 and load_check_status(chat_id) == "not_checked":
-                daily_progress[chat_id], penalties[chat_id], _ = load_data(chat_id)
-                save_check_status(chat_id, "checked")  # Mark that we've checked progress for today.
-                for user in group_members[chat_id]:
+            elif now.hour >= 5 and now.minute >= 0 and load_check_status(chat_id) == "not_checked":
+                daily_progress[chat_id], penalties[chat_id], credits[chat_id] = load_data(chat_id)
+                for user in group_members:
                     if not daily_progress[chat_id].get(user, False):  # If the user hasn't marked their progress
                         penalties[chat_id][user] = penalties[chat_id].get(user, 0) + 10  # Add $10 penalty
                 daily_progress[chat_id].clear()  # Reset daily progress for the next day
@@ -273,18 +290,19 @@ def check_time():
 
                 # Prepare the list of members and their penalties
                 members_list = []
-                for member in group_members[chat_id]:
+                for member in group_members:
                     penalty = penalties[chat_id].get(member, 0)
                     members_list.append(f"{member} - Penalty: ${penalty}")
                 response = "Checked daily LeetCode progress and penalties have been updated!\n\nGroup members and penalties:\n" + '\n'.join(members_list)
             
                 bot.send_message(chat_id, response)
+                save_check_status(chat_id, "checked")  # Mark that we've checked progress for today.
                 time.sleep(60)  # Sleep for 60 seconds to avoid multiple notifications
         
             # At 0 AM GMT+8, reset the flag for daily progress check
-            elif now.hour == 5 and now.minute >= 0 and now.minute <= 5:
+            elif now.hour == 4 and now.minute >= 50:
                 save_check_status(chat_id, "not_checked")
-                time.sleep(60)
+                time.sleep(10)
         
         time.sleep(60)  # Sleep for 10 seconds before checking again
 
