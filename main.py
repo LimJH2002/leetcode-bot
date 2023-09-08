@@ -16,6 +16,8 @@ penalties = {}
 credits = {}
 daily_refresh_checked = {}
 
+reminded = False
+
 def ensure_directory_exists(directory_name):
     if not os.path.exists(directory_name):
         os.makedirs(directory_name)
@@ -290,6 +292,16 @@ def check_time():
         tz = pytz.timezone('Asia/Singapore')
         now = datetime.now(tz)
         reminded_chat_ids = load_reminded_chat_ids()
+
+        #For Russell
+        if (now.hour == 12 or now.hour == 15 or now.hour == 18 or now.hour == 21) and not reminded:
+            reminded = True
+            bot.send_message(1758860067, "Don’t overthink, lower your expectations")
+            time.sleep(3660)
+        
+        if (now.hour == 13 or now.hour == 16 or now.hour == 19 or now.hour == 22) and reminded:
+            reminded = False
+            time.sleep(3660)
 
         for chat_id in load_chat_ids():
             people = ""
