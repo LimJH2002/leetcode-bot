@@ -292,12 +292,15 @@ def check_time():
         reminded_chat_ids = load_reminded_chat_ids()
 
         for chat_id in load_chat_ids():
+            people = ""
             group_members = load_members(chat_id)
             if now.hour == 13 and chat_id not in reminded_chat_ids:
                 daily_progress[chat_id], _, _ = load_data(chat_id)
                 for user in group_members:
-                    if not daily_progress[chat_id].get(user, False):
-                        bot.send_message(chat_id, f"@{user}, remember to complete your daily LeetCode challenge!")
+                  if not daily_progress[chat_id].get(user, False):
+                      people += f"@{user} "
+                if (people != ""):
+                  bot.send_message(chat_id, f"@{people}, remember to complete your daily LeetCode challenge!")
                 save_reminded_chat_id(chat_id)
                 time.sleep(60)  # Sleep for 60 seconds to avoid multiple reminders
         
