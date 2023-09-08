@@ -294,7 +294,7 @@ def check_time():
         for chat_id in load_chat_ids():
             people = ""
             group_members = load_members(chat_id)
-            if now.hour == 13 and chat_id not in reminded_chat_ids:
+            if now.hour == 23 and chat_id not in reminded_chat_ids:
                 daily_progress[chat_id], _, _ = load_data(chat_id)
                 for user in group_members:
                   if not daily_progress[chat_id].get(user, False):
