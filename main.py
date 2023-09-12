@@ -1,10 +1,10 @@
+from telegram.ext import Updater, CommandHandler
 import os
 import telebot
 import threading
 import time
 from datetime import datetime
 import pytz
-from keep_alive import keep_alive
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)
